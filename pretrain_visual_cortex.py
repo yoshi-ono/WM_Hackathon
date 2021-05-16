@@ -27,6 +27,8 @@ from torchvision import datasets, transforms
 from agent.stubs.visual_path import VisualPath, WriterSingleton
 from gym_game.envs.pygame_dataset import PyGameDataset
 
+import datetime
+
 show_encode_and_decode = True
 
 
@@ -235,4 +237,13 @@ def main():
 
 
 if __name__ == '__main__':
+    dt_start = datetime.datetime.now()
+    print(dt_start)
+
     main()
+
+    dt_end = datetime.datetime.now()
+    print(dt_start)
+    print(dt_end)
+    dt_elapsed_time = dt_end - dt_start
+    print("elapsed_time:{0}".format(dt_elapsed_time))

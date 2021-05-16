@@ -75,4 +75,4 @@ dt_end = datetime.datetime.now()
 print(dt_start)
 print(dt_end)
 dt_elapsed_time = dt_end - dt_start
-print("elapsed_time:{0}".format(dt_elapsed_time) + "[sec]")
+print("elapsed_time:{0}".format(dt_elapsed_time))
