@@ -26,6 +26,10 @@ torch, nn = try_import_torch()
 from gym_game.envs.pygame_pretrain_policy import PyGamePretrainPolicy
 from gym_game.envs.pygame_dataset import PyGameDataset
 
+import datetime
+dt_start = datetime.datetime.now()
+print(dt_start)
+
 if len(sys.argv) < 4:
     print('Usage: python simple_agent.py ENV_NAME ENV_CONFIG_FILE NUM_SAMPLES DATA_DIR')
     sys.exit(-1)
@@ -66,3 +70,9 @@ dataset.write(dir_name)
 
 # Uncomment to test recovery of the data
 #dataset.read(file_name)
+
+dt_end = datetime.datetime.now()
+print(dt_start)
+print(dt_end)
+dt_elapsed_time = dt_end - dt_start
+print("elapsed_time:{0}".format(dt_elapsed_time) + "[sec]")
