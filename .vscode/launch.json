@@ -1,0 +1,43 @@
+{
+    // IntelliSense を使用して利用可能な属性を学べます。
+    // 既存の属性の説明をホバーして表示します。
+    // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: アタッチ",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "."
+                }
+            ]
+        },
+        {
+            "name": "Python: Attach using Process Id",
+            "type": "python",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        },
+        {
+            // python train_agent.py m2l-v0 configs/m2l_av_env.json configs/agent_env_av.json configs/agent_av.json
+            "name": "train_agent.py m2l",
+            "type": "python",
+            "request": "launch",
+            "program": "train_agent.py",
+            "console": "integratedTerminal",
+            "args": [
+                "m2l-v0",
+                "configs/m2l_av_env.json",
+                "configs/agent_env_av.json",
+                "configs/agent_av.json"
+            ]
+        }
+    ]
+}
