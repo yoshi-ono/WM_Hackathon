@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
+            // https://code.visualstudio.com/docs/python/debugging#_debugging-by-attaching-over-a-network-connection
             "name": "Python: アタッチ",
             "type": "python",
             "request": "attach",
