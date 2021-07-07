@@ -4,6 +4,10 @@ from cerenaut_pt_core.components.sparse_autoencoder import SparseAutoencoder
 from utils.general_utils import mergedicts
 from .retina import *
 
+import os
+import threading
+import debugpy
+
 
 class VisualPath(nn.Module):
   """
@@ -50,6 +54,7 @@ class VisualPath(nn.Module):
     self._device = device
     self.summaries = True
     
+    print('>>>>>>>>>>>>>>>>>> ', self._name, 'pid:', os.getpid(), 'ident:', threading.get_ident())
     # Build networks to preprocess the observation space
     print('>>>>>>>>>>>>>>>>>> ', self._name, 'visual_cortex_input_shape: ', input_shape)
     retina_output_shape = self._build_retina(input_shape)
@@ -91,7 +96,17 @@ class VisualPath(nn.Module):
     return module
 
   def forward(self, x):
-
+    """
+    # 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
+    try:
+      debugpy.listen(5678)
+      print("Waiting for debugger attach")
+      debugpy.wait_for_client()
+    except RuntimeError as e:
+      print(e)
+    debugpy.breakpoint()
+    print('break on this line')
+    """
     # forward retina coding
     module_name = self.get_module_name(self.MODULE_RETINA)
     module = self._modules[module_name]
@@ -108,6 +123,7 @@ class VisualPath(nn.Module):
       writer.add_image(self._name + '/retina-output-dog+', torchvision.utils.make_grid(dog_pos), global_step=self.STEP)
       writer.add_image(self._name + '/retina-output-dog-', torchvision.utils.make_grid(dog_neg), global_step=self.STEP)
 
+      print('retina-input/output STEP:', self.STEP, self._name, 'pid:', os.getpid(), 'ident:', threading.get_ident())
       writer.flush()
 
     # forward cortex feature detection
