@@ -5,6 +5,7 @@ import torchvision
 from utils.image_filter_utils import get_dog_image_filter, conv2d_output_shape
 from utils.writer_singleton import WriterSingleton
 
+import debugpy
 
 class Retina(nn.Module):
   STEP = 0
@@ -47,6 +48,10 @@ class Retina(nn.Module):
                                                 device=self._device, k=k, invert=True)
 
   def forward(self, image_tensor):
+    
+    # debugpy.breakpoint()
+    # print('break on retina.py')
+    
     interest_pos = self._dog_filter_pos(image_tensor)
     interest_neg = self._dog_filter_neg(image_tensor)
     channel_dim = 1  # B,C,H,W

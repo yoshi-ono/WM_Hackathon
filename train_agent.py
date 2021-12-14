@@ -5,6 +5,7 @@
 # python simple_agent.py Env-vN
 #
 
+import os
 import math
 import json
 import shutil
@@ -16,6 +17,7 @@ import ray
 import ray.rllib.agents.a3c as a3c
 import ray.tune as tune
 from agent.agent import Agent
+import agent.agent as g_agent
 from ray.rllib.models import ModelCatalog
 from ray.rllib.utils.framework import try_import_torch
 
@@ -38,6 +40,9 @@ def env_creator(task_env_type, task_env_config_file, env_config_file):
 if len(sys.argv) < 4:
     print('Usage: python simple_agent.py ENV_NAME ENV_CONFIG_FILE ENV_CONFIG_FILE AGENT_CONFIG_FILE')
     sys.exit(-1)
+
+g_agent.g_pid = os.getpid()
+print("##### g_pid:", g_agent.g_pid)
 
 meta_env_type = 'stub-v0'
 task_env_type = sys.argv[1]

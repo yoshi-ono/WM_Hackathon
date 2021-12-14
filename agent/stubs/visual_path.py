@@ -8,6 +8,8 @@ import os
 import threading
 import debugpy
 
+import agent.agent as g_agent
+
 
 class VisualPath(nn.Module):
   """
@@ -62,6 +64,17 @@ class VisualPath(nn.Module):
     cortex_output_shape = self._build_visual_cortex(retina_output_shape)
     print('>>>>>>>>>>>>>>>>>> ', self._name, 'visual_cortex_output_shape: ', cortex_output_shape)
 
+    pid = os.getpid()
+    print("##### pid:", pid, "##### g_pid:", g_agent.g_pid)
+    if (pid != g_agent.g_pid):
+      # 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
+      try:
+        debugpy.listen(5678)
+        print("Waiting for debugger attach 5678")
+        debugpy.wait_for_client()
+      except RuntimeError as e:
+        print(e)
+
     self._output_shape = cortex_output_shape
 
     # Option to reload a trained set of parameters
@@ -96,17 +109,10 @@ class VisualPath(nn.Module):
     return module
 
   def forward(self, x):
-    """
-    # 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
-    try:
-      debugpy.listen(5678)
-      print("Waiting for debugger attach")
-      debugpy.wait_for_client()
-    except RuntimeError as e:
-      print(e)
-    debugpy.breakpoint()
-    print('break on this line')
-    """
+    
+    # debugpy.breakpoint()
+    # print('break on visual_path.py')
+    
     # forward retina coding
     module_name = self.get_module_name(self.MODULE_RETINA)
     module = self._modules[module_name]
@@ -123,7 +129,7 @@ class VisualPath(nn.Module):
       writer.add_image(self._name + '/retina-output-dog+', torchvision.utils.make_grid(dog_pos), global_step=self.STEP)
       writer.add_image(self._name + '/retina-output-dog-', torchvision.utils.make_grid(dog_neg), global_step=self.STEP)
 
-      print('retina-input/output STEP:', self.STEP, self._name, 'pid:', os.getpid(), 'ident:', threading.get_ident())
+      ##print('retina-input/output STEP:', self.STEP, self._name, 'pid:', os.getpid(), 'ident:', threading.get_ident())
       writer.flush()
 
     # forward cortex feature detection

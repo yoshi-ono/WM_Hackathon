@@ -50,6 +50,7 @@ class StubPreprocessor(Preprocessor):
     #tx = observation
     return tx  # return the preprocessed observation
 
+g_pid = 0
 
 class Agent(TorchModelV2, nn.Module):
   """PyTorch custom model that flattens the input to 1d and delegates to a fc-net."""

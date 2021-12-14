@@ -5,8 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
             // https://code.visualstudio.com/docs/python/debugging#_debugging-by-attaching-over-a-network-connection
-            "name": "Python: アタッチ",
+            "name": "Python: アタッチ 5678",
             "type": "python",
             "request": "attach",
             "connect": {
@@ -27,7 +34,9 @@
             "processId": "${command:pickProcess}"
         },
         {
-            // python train_agent.py m2l-v0 configs/m2l_av_env.json configs/agent_env_av.json configs/agent_av.json
+            // Move-to-Light (M2L) task - A simple test case for the active vision system.
+            // See Active Vision System for more information.
+            // % python train_agent.py m2l-v0 configs/m2l_av_env.json configs/agent_env_av.json configs/agent_av.json
             "name": "train_agent.py m2l",
             "type": "python",
             "request": "launch",
@@ -39,6 +48,48 @@
                 "configs/agent_env_av.json",
                 "configs/agent_av.json"
             ]
+        },
+        {
+            // Match-to-Sample (M2S) task.
+            // An agent is shown a sample, and then given a choice of two other samples to match it.
+            // The correct match will be the same in one attribute, such as colour or shape.
+            // False matches vary in the necessary attribute.
+            // The relevant attribute varies from game to game, and the correct logic is learned by watching a tutor play the game first.
+            // % python train_agent.py m2s-v0 configs/m2s_env.json configs/stub_agent_env_full.json configs/stub_agent_full.json
+            "name": "train_agent.py m2s",
+            "type": "python",
+            "request": "launch",
+            "program": "train_agent.py",
+            "console": "integratedTerminal",
+            "args": [
+                "m2s-v0",
+                "configs/m2s_env.json",
+                "configs/stub_agent_env_full.json",
+                "configs/stub_agent_full.json"
+            ]
+        },
+        {
+            // Test the operation of the Retina on an example image with the following command.
+            // The test creates matplotlib plots that are shown in a GUI and saved to file results.png.
+            // % python tests/test_retina.py resources/screen_example.jpg
+            "name": "Retina",
+            "type": "python",
+            "request": "launch",
+            "program": "tests/test_retina.py",
+            "console": "integratedTerminal",
+            "args": [
+                "resources/screen_example.jpg"
+            ]
+        },
+        {
+            // Visualise the function of positional encoding with the following test.
+            // The output is an image positional_encoding.png.
+            // % python tests/test_positional_encoding.py
+            "name": "Positional Encoding",
+            "type": "python",
+            "request": "launch",
+            "program": "tests/test_positional_encoding.py",
+            "console": "integratedTerminal"
         }
     ]
 }
