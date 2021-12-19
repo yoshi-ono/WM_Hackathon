@@ -72,7 +72,7 @@
             // Test the operation of the Retina on an example image with the following command.
             // The test creates matplotlib plots that are shown in a GUI and saved to file results.png.
             // % python tests/test_retina.py resources/screen_example.jpg
-            "name": "Retina",
+            "name": "test_retina",
             "type": "python",
             "request": "launch",
             "program": "tests/test_retina.py",
@@ -85,7 +85,7 @@
             // Visualise the function of positional encoding with the following test.
             // The output is an image positional_encoding.png.
             // % python tests/test_positional_encoding.py
-            "name": "Positional Encoding",
+            "name": "test_positional_encoding",
             "type": "python",
             "request": "launch",
             "program": "tests/test_positional_encoding.py",
