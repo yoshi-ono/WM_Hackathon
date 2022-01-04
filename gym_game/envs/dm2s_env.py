@@ -6,6 +6,9 @@ from pygame.locals import *
 import logging
 from .finite_state_env import FiniteStateEnv
 
+import logging
+logger = logging.getLogger("Dm2sEnv")
+
 
 class Dm2sEnv(FiniteStateEnv):
 
@@ -53,15 +56,16 @@ class Dm2sEnv(FiniteStateEnv):
   gParams = {}  # parameter dictionary
 
   def __init__(self, config_file=None):
+    logger.debug("IN")
     # obtain parameters from a file
-    print('Env config file:', config_file)
+    logger.debug('Env config file: %s', config_file)
     # with open(config_file) as f:
     #   for line in f:
     #     buf = line.strip().split(",")
     #     self.gParams[buf[0]] = buf[1]
     with open(config_file) as json_file:
       self.gParams = json.load(json_file)
-    print('D2MS gParams:', self.gParams)
+    logger.debug('D2MS gParams: %s', self.gParams)
     #self.image_dir = 'png'
     self.gVideoWidth = self.gParams["videoWidth"]
     self.gVideoHeight = self.gParams["videoHeight"]
@@ -169,7 +173,7 @@ class Dm2sEnv(FiniteStateEnv):
               self.result = self.RESULT_CORRECT
             else:
               self.result = self.RESULT_WRONG
-            print("Response: "+str(action)+", Correct response: "+str(self.position))
+            logger.debug("Response: %s, Correct response: %s", str(action), str(self.position))
           new_state_key = next_state_keys[0]
           return new_state_key
         # else: wait for timer
@@ -182,7 +186,7 @@ class Dm2sEnv(FiniteStateEnv):
         new_state_key = next_state_keys[0]
 
         if old_state_key == self.STATE_PLAY_SHOW:
-          print("Response: None, Correct response: "+str(self.position))
+          logger.debug("Response: None, Correct response: %s", str(self.position))
 
         # Repeat certain sections again and again        
         self.tutor_repeats = int(self.gParams["observationRepeat"])
@@ -215,7 +219,7 @@ class Dm2sEnv(FiniteStateEnv):
     numGameTypes = len(self.gameTypes)
     gameTypeIndex = self.np_random.randint(0, numGameTypes)    
     gameType = self.gameTypes[gameTypeIndex]
-    print('GAME TYPE: ', gameType)
+    logger.debug('GAME TYPE: %s', gameType)
     return gameType
 
   def get_random_tx_type(self):

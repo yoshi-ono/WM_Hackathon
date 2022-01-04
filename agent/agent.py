@@ -1,4 +1,3 @@
-import logging
 import sys
 import numpy as np
 
@@ -32,6 +31,9 @@ config = {
 
 from ray.rllib.models.preprocessors import Preprocessor
 
+import logging
+logger = logging.getLogger("Agent")
+
 
 class StubPreprocessor(Preprocessor):
   """Test of a custom preprocessor - not required, for now, as this functionality is now in the wrapping Environment."""
@@ -56,7 +58,10 @@ class Agent(TorchModelV2, nn.Module):
   """PyTorch custom model that flattens the input to 1d and delegates to a fc-net."""
 
   def __init__(self, obs_space, action_space, num_outputs, model_config, name):
+    logger.debug("IN")
     self.custom_model_config = config
+
+    logger.debug(model_config)
 
     # Reshape obs to vector and convert to float
     volume = np.prod(obs_space.shape)

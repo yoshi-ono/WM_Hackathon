@@ -6,9 +6,9 @@ from .retina import *
 
 import os
 import threading
-import debugpy
 
-import agent.agent as g_agent
+import logging
+logger = logging.getLogger("VisualPath")
 
 
 class VisualPath(nn.Module):
@@ -56,31 +56,20 @@ class VisualPath(nn.Module):
     self._device = device
     self.summaries = True
     
-    print('>>>>>>>>>>>>>>>>>> ', self._name, 'pid:', os.getpid(), 'ident:', threading.get_ident())
+    logger.debug('>>>>>>>>>>>>>>>>>> %s pid: %s ident: %s', self._name, os.getpid(), threading.get_ident())
     # Build networks to preprocess the observation space
-    print('>>>>>>>>>>>>>>>>>> ', self._name, 'visual_cortex_input_shape: ', input_shape)
+    logger.debug('>>>>>>>>>>>>>>>>>> %s visual_cortex_input_shape: %s', self._name, input_shape)
     retina_output_shape = self._build_retina(input_shape)
-    print('>>>>>>>>>>>>>>>>>> ', self._name, 'retina_output_shape: ', retina_output_shape)
+    logger.debug('>>>>>>>>>>>>>>>>>> %s retina_output_shape: %s', self._name, retina_output_shape)
     cortex_output_shape = self._build_visual_cortex(retina_output_shape)
-    print('>>>>>>>>>>>>>>>>>> ', self._name, 'visual_cortex_output_shape: ', cortex_output_shape)
-
-    pid = os.getpid()
-    print("##### pid:", pid, "##### g_pid:", g_agent.g_pid)
-    if (pid != g_agent.g_pid):
-      # 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
-      try:
-        debugpy.listen(5678)
-        print("Waiting for debugger attach 5678")
-        debugpy.wait_for_client()
-      except RuntimeError as e:
-        print(e)
+    logger.debug('>>>>>>>>>>>>>>>>>> %s visual_cortex_output_shape: %s', self._name, cortex_output_shape)
 
     self._output_shape = cortex_output_shape
 
     # Option to reload a trained set of parameters
     if self._config['load'] is not None:
       cpkt_file = self._config['load']
-      print('Loading parameters from checkpoint: ', cpkt_file)
+      logger.debug('Loading parameters from checkpoint: %s', cpkt_file)
       self.load(cpkt_file)
 
   def get_output_shape(self):

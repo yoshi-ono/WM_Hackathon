@@ -14,10 +14,14 @@ from .pygame_env import PyGameEnv
 from .finite_state_env import FiniteStateEnv
 from .dm2s_env import Dm2sEnv
 
+import logging
+logger = logging.getLogger("M2sEnv")
+
 
 class M2sEnv(Dm2sEnv):
 
   def __init__(self, config_file=None):
+    logger.debug("IN")
     super().__init__(config_file)
 
   def _create_states(self):
@@ -65,7 +69,7 @@ class M2sEnv(Dm2sEnv):
             self.result = self.RESULT_CORRECT
           else:
             self.result = self.RESULT_WRONG
-          print("Response: "+str(action)+", Correct response: "+str(self.position))
+          logger.info("Response: "+str(action)+", Correct response: "+str(self.position))
         new_state_key = next_state_keys[0]
         return new_state_key
       # else: wait for timer
@@ -78,7 +82,7 @@ class M2sEnv(Dm2sEnv):
         new_state_key = next_state_keys[0]
 
         if old_state_key == self.STATE_PLAY_SHOW:
-          print("Response: None, Correct response: "+str(self.position))
+          logger.info("Response: None, Correct response: "+str(self.position))
 
         # Repeat certain sections again and again        
         self.tutor_repeats = int(self.gParams["observationRepeat"])

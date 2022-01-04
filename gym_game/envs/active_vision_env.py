@@ -1,4 +1,3 @@
-import logging
 from enum import Enum
 
 import numpy as np
@@ -8,6 +7,10 @@ from skimage import img_as_float32
 from utils.image_utils import fast_resize, to_pytorch_from_uint8
 from utils.writer_singleton import WriterSingleton
 from .pygame_env import PyGameEnv
+
+import logging
+logger = logging.getLogger("ActiveVisionEnv")
+logger.setLevel("INFO")
 
 """
   ActiveVisionEnv receives a screen image.
@@ -81,6 +84,7 @@ class ActiveVisionEnv(PyGameEnv):
     and creating a dictionary of params before calling super.init() to get to here.
     i.e. the params are available via self.get_config()
     """
+    logger.info("IN")
     config = self.get_config()
 
     self.screen_scale = float(config["screen_scale"])  # resize the screen image before returning as an observation
@@ -146,7 +150,7 @@ class ActiveVisionEnv(PyGameEnv):
 
   def _do_step(self, action, time):
     # update the position of the fovea (fov_pos), given the action taken
-    logging.debug("Received action: ", action)
+    logger.debug("Received action: %s", action)
 
     if not self.enabled:
       return

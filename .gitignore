@@ -10,3 +10,6 @@ runs/
 .idea/
 *.zip
 checkpoints/stub_agent_checkpoint
+WM_Hackathon.srctrl*
+.DS_Store
+WM_Hackathon.code-workspace

@@ -1,12 +1,15 @@
 
 from abc import ABC, abstractmethod
-import logging
 from .active_vision_env import ActiveVisionEnv
 
+import logging
+logger = logging.getLogger("FiniteStateEnv")
+logger.setLevel("INFO")
 
 class FiniteStateEnv(ActiveVisionEnv):
 
   def __init__(self, num_actions, screen_width, screen_height, frame_rate):
+    logger.info("IN")
 
     # Create state machine
     self.states = {}
@@ -62,8 +65,8 @@ class FiniteStateEnv(ActiveVisionEnv):
     self.states[state_key] = state
     if start_state is True:
       self.start_state = state_key
-      logging.debug('Start state = ', state_key)
-    logging.debug('Adding state:', str(state))
+      logger.debug('Start state = %s', state_key)
+    logger.debug('Adding state: %s', str(state))
 
   def set_state(self, state_key):
     old_state_key = self.state_key
@@ -74,7 +77,7 @@ class FiniteStateEnv(ActiveVisionEnv):
     self.on_state_changed(old_state_key, state_key)
 
   def on_state_changed(self, old_state_key, new_state_key):
-    logging.info('State -> ', self.state_key, '@t=', self.state_time)
+    logger.debug('State -> %s @t= %s', self.state_key , self.state_time)
 
   def get_state_key(self):
     return self.state_key
@@ -97,7 +100,7 @@ class FiniteStateEnv(ActiveVisionEnv):
     super()._do_step(action, time)
     old_state_key = self.get_state_key()
     elapsed_time = self.get_state_elapsed_time()
-    logging.debug('old state=', old_state_key, 'time=', elapsed_time)
+    logger.debug('old state= %s time= %s', old_state_key, elapsed_time)
     #print('old state=', old_state_key, 'state time=', elapsed_time)
     new_state_key = self._update_state_key(old_state_key, action, elapsed_time)
     reward = self._update_reward(old_state_key, action, elapsed_time, new_state_key)
@@ -115,5 +118,5 @@ class FiniteStateEnv(ActiveVisionEnv):
       'reward': self.reward, 
       'action': action,
       'done': is_end_state}
-    logging.info('additional:', str(additional))
+    logger.debug('additional: %s', str(additional))
     return [observation, self.reward, is_end_state, additional]

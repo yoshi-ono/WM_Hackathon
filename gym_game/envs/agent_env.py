@@ -23,6 +23,9 @@ from utils.general_utils import mergedicts
 
 torch, nn = try_import_torch()
 
+import logging
+logger = logging.getLogger("AgentEnv")
+
 
 """
   Wraps a task-specific environment and implements brain modules that are not trained by Reinforcement Learning.
@@ -90,6 +93,8 @@ class AgentEnv(gym.Env):
     return updated_config
 
   def __init__(self, env_type, env_config_file, config_file):
+    logger.debug("IN")
+    logger.debug("gym_game/__init__.py register id='%s'", env_type)
     self.env = gym.make(env_type, config_file=env_config_file)
     #self.env = env_type(env_config_file)
     self.action_space = self.env.action_space
@@ -102,7 +107,7 @@ class AgentEnv(gym.Env):
       delta_config = json.load(json_file)
       self._config = self.update_config(default_config, delta_config)
 
-    print("=======================> CONFIG IS: ", self._config)
+    logger.debug("=======================> CONFIG IS: %s", self._config)
 
     # gather all obs keys
     self._obs_keys = []
@@ -182,6 +187,7 @@ class AgentEnv(gym.Env):
     for obs_key in self._config["obs_keys"]["visual"]:
       input_shape = self.create_input_shape_visual(self.env_observation_space, obs_key)
       config = self._config[obs_key]
+      logger.debug('>>> NEW >>> VisualPath')
       visual_path = VisualPath(obs_key, input_shape, config, device=self._device).to(self._device)
       self.modules[obs_key] = visual_path
 
@@ -292,7 +298,7 @@ class AgentEnv(gym.Env):
 
     start = None
     if debug_timing:
-      print('>>>>>>>>>>> Stub step')
+      logger.debug('>>>>>>>>>>> Stub step')
       start = timer()
 
     # Update PFC with current action, which flow through to motor actions
@@ -308,22 +314,22 @@ class AgentEnv(gym.Env):
 
     # The purpose of this section is to verify that valid observations are emitted.
     if debug_observation:
-      print('Tx Obs keys ', tx_obs.keys())
+      logger.debug('Tx Obs keys %s', tx_obs.keys())
       o = tx_obs['full']
-      print('Obs Shape = ', o.shape)
+      logger.debug('Obs Shape = %s', o.shape)
       import hashlib
       m = hashlib.md5()
       m.update(o)
       h = m.hexdigest()
-      print(' Hash = ', h)
+      logger.debug(' Hash = %s', h)
 
-      print('SA-ENV: OBS STATS: ')
+      logger.debug('SA-ENV: OBS STATS: ')
       for key, val in tx_obs.items():
-        print("\t{}: {}, {}, {}".format(key, val.shape, val.min(), val.max()))
+        logger.debug("\t{}: {}, {}, {}".format(key, val.shape, val.min(), val.max()))
 
     if debug_timing:
       end = timer()
-      print('Step elapsed time: ', str(end - start))  # Time in seconds, e.g. 5.38091952400282
+      logger.debug('Step elapsed time: %s', str(end - start))  # Time in seconds, e.g. 5.38091952400282
 
     return emit
 
@@ -342,7 +348,7 @@ class AgentEnv(gym.Env):
     return self.env.get_time()
 
   def get_observation(self):
-    print('>>>>>>>>>>> Stub get obs')
+    logger.debug('>>>>>>>>>>> Stub get obs')
     obs = self.env.get_observation()
     tx_obs = self.forward_observation(obs)
     return tx_obs

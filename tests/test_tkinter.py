@@ -6,13 +6,20 @@ import os
 import time
 import cv2
 
+import logging
+format = "%(asctime)s %(levelname)s %(module)s(%(lineno)s):%(funcName)s\t%(message)s"
+logging.basicConfig(level=logging.DEBUG, format=format)
+logger = logging.getLogger("*")
+
 class TkEye(tk.Frame):
     def __init__(self, root=None):
+        logger.debug("@")
         super().__init__(root)
 
         self.create_canvas()
 
     def create_canvas(self):
+        logger.debug("@")
         self.label = tk.Label(self, text='Label')
         self.label.pack()
 
@@ -41,6 +48,7 @@ class TkEye(tk.Frame):
         )
 
     def set_image(self, img):    
+        logger.debug("@")
         self.img1 = img
         self.canvas.itemconfig(self.c_item, image=self.img1)
     
@@ -58,14 +66,16 @@ def get_image(q=None):
     if (q != None):
         img2 = cv2.imread('results.png')
         q.put(img2)
-    print('[get_image] process id:', os.getpid())
+    #print(__name__, '[get_image] process id:', os.getpid())
+    logger.debug('[get_image] process id: %s', os.getpid())
     return img1
 
 def show1():
     tk_eye1 = TkEye()
     tk_eye1.grid(column=0,row=0)
     #print('[1] parent process:', os.getppid())
-    print('[show1] process id:', os.getpid())
+    #print(__name__, '[show1] process id:', os.getpid())
+    logger.debug('[show1] process id: %s', os.getpid())
 
 def show2(root, q=None):
     #img = get_image()
@@ -76,7 +86,8 @@ def show2(root, q=None):
     #tk_eye2.set_image(img)
     tk_eye2.grid(column=0,row=0)
     #print('[2] parent process:', os.getppid())
-    print('[show2] process id:', os.getpid())
+    #print(__name__, '[show2] process id:', os.getpid())
+    logger.debug('[show2] process id: %s', os.getpid())
     return tk_eye2
 
 def change(tk_eye2, q=None):
@@ -101,7 +112,8 @@ if __name__ == '__main__':
     proc = Process(target=get_image, args=(q,))
     proc.start()
 
-    print(__name__, 'process id:', os.getpid())
+    #print(__name__, 'process id:', os.getpid())
+    logger.debug('[main] process id: %s', os.getpid())
 
     #thread1 = threading.Thread(target=start1)
     #thread1.start()

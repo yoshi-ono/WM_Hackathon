@@ -6,6 +6,9 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pygame as pygame
 
+import logging
+logger = logging.getLogger("PyGameEnv")
+
 
 class PyGameEnv(gym.Env, ABC):
 
@@ -16,6 +19,7 @@ class PyGameEnv(gym.Env, ABC):
 
   def __init__(self, num_actions, screen_width, screen_height, frame_rate):
     # here spaces.Discrete(2) means that action can either be L or R choice
+    logger.debug("IN")
     channels = 3
     self.screen_shape = [screen_height, screen_width, channels]
     self._create_action_space(num_actions)

@@ -25,6 +25,13 @@ from utils.writer_singleton import WriterSingleton
 
 torch, nn = try_import_torch()
 
+import debugpy
+
+import logging
+format = "%(asctime)s [%(levelname)s] %(module)s(%(lineno)s):%(funcName)s\t%(message)s"
+logging.basicConfig(level=logging.DEBUG, format=format)
+logger = logging.getLogger("Train Agent")
+
 """
 Create a simple RL agent using an Agent. 
 The environment can be chosen. Both environment and agent are configurable.
@@ -34,35 +41,52 @@ The environment can be chosen. Both environment and agent are configurable.
 def env_creator(task_env_type, task_env_config_file, env_config_file):
   """Custom functor to create custom Gym environments."""
   from gym_game.envs import AgentEnv
+
+  pid = os.getpid()
+  logger.debug("##### pid: %s ##### g_pid: %s", pid, g_agent.g_pid)
+  if (pid != g_agent.g_pid):
+    format = "%(asctime)s [%(levelname)s] %(module)s(%(lineno)s):%(funcName)s\t%(message)s"
+    logging.basicConfig(level=logging.DEBUG, format=format)
+    # 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
+    try:
+      debugpy.listen(5678)
+      logger.debug("Waiting for debugger attach 5678")
+      debugpy.wait_for_client()
+    except RuntimeError as e:
+      logger.debug(e)
+
+  logger.debug('>>> NEW >>> AgentEnv')
   return AgentEnv(task_env_type, task_env_config_file, env_config_file)  # Instantiate with config fil
 
 
 if len(sys.argv) < 4:
-    print('Usage: python simple_agent.py ENV_NAME ENV_CONFIG_FILE ENV_CONFIG_FILE AGENT_CONFIG_FILE')
+    logger.debug('Usage: python simple_agent.py ENV_NAME ENV_CONFIG_FILE ENV_CONFIG_FILE AGENT_CONFIG_FILE')
     sys.exit(-1)
 
 g_agent.g_pid = os.getpid()
-print("##### g_pid:", g_agent.g_pid)
+logger.debug("##### g_pid: %s", g_agent.g_pid)
 
 meta_env_type = 'stub-v0'
 task_env_type = sys.argv[1]
-print('Task Gym[PyGame] environment:', task_env_type)
+logger.debug('Task Gym[PyGame] environment: %s', task_env_type)
 task_env_config_file = sys.argv[2]
-print('Task Env config file:', task_env_config_file)
+logger.debug('Task Env config file: %s', task_env_config_file)
 env_config_file = sys.argv[3]
-print('Env config file:', env_config_file)
+logger.debug('Env config file: %s', env_config_file)
 model_config_file = sys.argv[4]
-print('Agent config file:', model_config_file)
+logger.debug('Agent config file: %s', model_config_file)
 
 # Try to instantiate the environment
+logger.debug('>>> CALL >>> env_creator')
 env = env_creator(task_env_type, task_env_config_file, env_config_file)  #gym.make(env_name, config_file=env_config_file)
+logger.debug('>>> CALL >>> tune.register_env')
 tune.register_env(meta_env_type, lambda config: env_creator(task_env_type, task_env_config_file, env_config_file))
 
 # Check action space of the environment
 if not hasattr(env.action_space, 'n'):
     raise Exception('Only supports discrete action spaces')
 ACTIONS = env.action_space.n
-print("ACTIONS={}".format(ACTIONS))
+logger.debug("ACTIONS={}".format(ACTIONS))
 
 # Some general preparations... 
 render_mode = 'rgb_array'
@@ -100,13 +124,13 @@ if model_config_file is not None:
     # Override model config
     model_delta_config = delta_config['model']
     for key, value in model_delta_config.items():
-      print('Agent.model config: ', key, ' --> ', value)
+      logger.debug('Agent.model config: %s --> %s', key, value)
       agent_config["model"][key] = value
 
     # Override agent config
     agent_delta_config = delta_config['agent']
     for key, value in agent_delta_config.items():
-      print('Agent config: ', key, ' --> ', value)
+      logger.debug('Agent config: %s --> %s', key, value)
       agent_config[key] = value
 
     # Load parameters that control the training regime
@@ -120,12 +144,14 @@ if model_config_file is not None:
 # Register the custom items
 ModelCatalog.register_custom_model(model_name, Agent)
 
-print('Agent config:\n', agent_config)
+logger.debug('Agent config: %s\n', agent_config)
 #agent_config['gamma'] = 0.0
+logger.debug('>>> CALL >>> a3c.A3CTrainer')
 agent = a3c.A3CTrainer(agent_config, env=meta_env_type)  # Note use of custom Env creator fn
+logger.debug('<<< CALL <<< a3c.A3CTrainer')
 
 # Use this line uncommented to see the whole config and all options
-#print('\n\n\nPOLICY CONFIG',agent.get_policy().config,"\n\n\n")
+#logger.debug('\n\n\nPOLICY CONFIG',agent.get_policy().config,"\n\n\n")
 
 
 # Train the model
@@ -151,8 +177,8 @@ def update_results(result_step, results_list, result_key):
   if len(results_list) < 1:
     return 0.0  # can't mean if there's a nan
   mean_value = mean(results_list)
-  #print('list:', results)
-  #print('list mean:', mean_value)
+  #logger.debug('list:', results)
+  #logger.debug('list mean:', mean_value)
   return mean_value
 
 
@@ -184,13 +210,14 @@ result_writer_keys = [
 evaluation_epoch = 0
 for training_epoch in range(training_epochs):  # number of epochs for all training
   # Train for many steps
-  print('Training Epoch ~~~~~~~~~> ', training_epoch)
+  logger.debug('Training Epoch ~~~~~~~~~> %s', training_epoch)
 
   # https://github.com/ray-project/ray/issues/8189 - inference mode
   agent.get_policy().config['explore'] = True  # Revert to training
   for training_step in range(training_steps):  # steps in an epoch
+    logger.debug(">>> CALL >>> agent.train")
     result = agent.train()  # Runs a whole Episode, which includes several tasks and a tutoring phase
-    #print('>>> Result: \n\n', result)  # Use this find examine additional keys in the results for plotting
+    #logger.debug('>>> Result: \n\n', result)  # Use this find examine additional keys in the results for plotting
 
     # Calculate moving averages for console reporting
     mean_min  = update_results(result, results_min, "episode_reward_min")
@@ -205,7 +232,7 @@ for training_epoch in range(training_epochs):  # number of epochs for all traini
       update_writer(result, result_key, writer, writer_key, global_step)
     writer.flush()
 
-    print(status_message.format(
+    logger.debug(status_message.format(
       global_step,
       mean_min,
       mean_mean,
@@ -224,7 +251,7 @@ for training_epoch in range(training_epochs):  # number of epochs for all traini
 
   # Periodically evaluate
   if (training_epoch % evaluation_interval) == 0:
-    print('Evaluation Epoch ~~~~~~~~~> ', evaluation_epoch)
+    logger.debug('Evaluation Epoch ~~~~~~~~~> %s', evaluation_epoch)
     agent.get_policy().config['explore'] = False  # Inference mode
     for evaluation_step in range(evaluation_steps):  # steps in an epoch
       result = agent.train()
@@ -238,5 +265,5 @@ for training_epoch in range(training_epochs):  # number of epochs for all traini
     evaluation_epoch = evaluation_epoch + 1
 
 # Finish
-print('Shutting down...')
+logger.debug('Shutting down...')
 ray.shutdown()
